@@ -1,4 +1,5 @@
 import sys
+from collections import deque
 
 #stable matching class
 class StableMatcher:
@@ -70,6 +71,49 @@ class StableMatcher:
                     return f"UNSTABLE: Blocking pair ({h}, {s_candidate})"
 
         return "VALID STABLE"
+    
+    #run hospital-proposing Gale-Shapley Algorithm
+    def solve_match(self):
+        free_hospitals = deque(range(1, self.n + 1))
+        matches = {}
+
+        #track which index in preference list each hospital is at
+        proposals_made = {h: 0 for h in range(1, self.n + 1)}
+
+        while free_hospitals:
+            h = free_hospitals[0]
+            #get next student to propose to
+            pref_list_idx = proposals_made[h]
+
+            #check to see if h has proposed to everyone
+            if pref_list_idx >= self.n:
+                free_hospitals.popleft()
+                continue
+
+            s = self.hospital_prefs[h-1][pref_list_idx]
+            #advance pointer
+            proposals_made[h] += 1 
+
+            if s not in matches:
+                matches[s] = h
+                free_hospitals.popleft()
+            else:
+                current_h = matches[s]
+                #check student preferences
+                if self.ranks[s-1][h] < self.ranks[s-1][current_h]:
+                    #student prefers new hospital, and will trade up
+                    matches[s] = h
+                    free_hospitals.popleft()
+                    free_hospitals.append(current_h)
+                else:
+                    #student rejects, and the hospital remains free
+                    pass
+                    
+        #invert matches to hospital -> student
+        return {h: s for s, h in matches.items()}
+    
+
+
         
 
 

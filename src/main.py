@@ -114,7 +114,28 @@ class StableMatcher:
     
 
 
-        
+if __name__ == "__main__":
+    # initlialize solver instance
+    solver = StableMatcher()
+
+    # step 1: parse input
+    solver.parse_input()
+
+    # step 2: execute algo
+    result = solver.solve_match
+
+    # format output
+    for h in sorted(result.keys()):
+        print(f"{h} {result[h]}")
+
+
+    # self verification (checks results after generating, print sys.stderr then output format
+    verification_status = solver.verify_matching(result)
+
+    if verification_status == "VALID STABLE":
+        print(f"VerifierL {verification_status}", file=sys.stderr)
+    else:
+        print(f"Verifier Error: {verification_status}", file=sys.stderr)
 
 
 

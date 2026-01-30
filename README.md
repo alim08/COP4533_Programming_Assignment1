@@ -83,7 +83,7 @@ The performance graph demonstrates a clear **non-linear growth** in running time
 The observed trend is consistent with the theoretical time complexity of the Gale-Shapley algorithm.
 
 1.  **Theoretical Complexity:** The algorithm has a worst-case time complexity of $O(N^2)$ and an average-case complexity of $O(N \log N)$.
-2.  **Experimental Validation:** The "hockey stick" shape of our graph confirms that as $N$ scales, the cost of processing preference lists and managing proposals accelerates. This supports the conclusion that the implementation behaves quadratically ($O(N^2)$) in practice for the given random datasets.
+2.  **Experimental Validation:** The "hockey stick" shape of our graph confirms that as $N$ scales, the cost of processing preference lists and managing proposals accelerates. This supports the conclusion that the implementation behaves quadratically (O(N^2)) in practice for the given random datasets.
 3.  **Verifier Behavior:** The verifier also exhibits quadratic scaling, since it must check all potential blocking pairs.
 
 ## Assumptions

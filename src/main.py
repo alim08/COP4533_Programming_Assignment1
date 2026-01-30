@@ -112,30 +112,87 @@ class StableMatcher:
         #invert matches to hospital -> student
         return {h: s for s, h in matches.items()}
     
+    #helper function to read matching from input lines
+    def read_matching(self, input_lines):
+        proposed_matching = {}
+        for line in input_lines:
+            parts = line.strip().split()
+            if len(parts) == 2:
+                h, s = int(parts[0]), int(parts[1])
+                proposed_matching[h] = s
+        return proposed_matching
+    
 
 
 if __name__ == "__main__":
-    # initlialize solver instance
     solver = StableMatcher()
 
-    # step 1: parse input
-    solver.parse_input()
+    def parse_prefs_from_tokens(token_iterator, target_solver):
+        target_solver.n = int(next(token_iterator))
+        target_solver.hospital_prefs = []
+        target_solver.student_prefs = []
+        target_solver.ranks = []
 
-    # step 2: execute algo
-    result = solver.solve_match
+        for _ in range(target_solver.n):
+            row = [int(next(token_iterator)) for _ in range(target_solver.n)]
+            target_solver.hospital_prefs.append(row)
 
-    # format output
-    for h in sorted(result.keys()):
-        print(f"{h} {result[h]}")
+        for _ in range(target_solver.n):
+            row = [int(next(token_iterator)) for _ in range(target_solver.n)]
+            target_solver.student_prefs.append(row)
+            rank_map = {h: r for r, h in enumerate(row)}
+            target_solver.ranks.append(rank_map)
 
+    try:
+        mode = sys.argv[1] if len(sys.argv) > 1 else "match"
 
-    # self verification (checks results after generating, print sys.stderr then output format
-    verification_status = solver.verify_matching(result)
+        if mode == "match":
+            #read preferences from stdin
+            tokens = sys.stdin.read().split()
+            token_iterator = iter(tokens)
+            parse_prefs_from_tokens(token_iterator, solver)
 
-    if verification_status == "VALID STABLE":
-        print(f"VerifierL {verification_status}", file=sys.stderr)
-    else:
-        print(f"Verifier Error: {verification_status}", file=sys.stderr)
+            result = solver.solve_match()
+            output_lines = [f"{h} {result[h]}" for h in sorted(result.keys())]
+            output_text = "\n".join(output_lines)
+
+            if len(sys.argv) > 2:
+                output_path = sys.argv[2]
+                with open(output_path, "w") as f:
+                    f.write(output_text + "\n")
+
+            print(output_text)
+
+        elif mode == "verify":
+            #if files are provided, read prefs and matching separately to avoid concatenation issues.
+            if len(sys.argv) > 3:
+                prefs_path = sys.argv[2]
+                matching_path = sys.argv[3]
+
+                prefs_tokens = open(prefs_path, "r").read().split()
+                parse_prefs_from_tokens(iter(prefs_tokens), solver)
+
+                matching_tokens = open(matching_path, "r").read().split()
+                token_iterator = iter(matching_tokens)
+            else:
+                #fallback: read all from stdin (requires a separator between files)
+                tokens = sys.stdin.read().split()
+                token_iterator = iter(tokens)
+                parse_prefs_from_tokens(token_iterator, solver)
+
+            proposed_matching = {}
+            try:
+                while True:
+                    h = int(next(token_iterator))
+                    s = int(next(token_iterator))
+                    proposed_matching[h] = s
+            except StopIteration:
+                pass
+
+            print(solver.verify_matching(proposed_matching))
+
+    except Exception as e:
+        sys.stderr.write(f"Error: {e}\n")
 
 
 

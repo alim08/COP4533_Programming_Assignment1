@@ -15,9 +15,9 @@ This project implements the **Gale-Shapley Algorithm** (Hospital-Proposing Defer
 ---
 
 ## Directory Structure
-* `main.py`: The core program containing the `StableMatcher` class, input parser, and verifier.
-* `gen.py`: A utility script to generate random input files for testing.
-* `benchmark.py`: A script to automate performance testing and plot the time complexity graph.
+* `src/main.py`: The core program containing the `StableMatcher` class, input parser, and verifier.
+* `src/gen.py`: A utility script to generate random input files for testing.
+* `src/benchmark.py`: A script to automate performance testing and plot the time complexity graph.
 * `scalability_graph.png`: The output graph from the benchmark script.
 
 ---
@@ -64,7 +64,7 @@ python3 src/main.py verify data/example.in data/example.out
 ## Task C: Scalability Analysis & Graph
 
 ### Instructions to Run Benchmark
-To reproduce the scalability data and generate the performance graph, run the benchmark script. This script automatically generates random test cases for sizes $N = 1, 2, \dots, 512$, times the matching engine, and uses `matplotlib` to plot the results.
+To reproduce the scalability data and generate the performance graph, run the benchmark script. This script automatically generates random test cases for sizes $N = 1, 2, \dots, 512$, times both the matcher and verifier, and uses `matplotlib` to plot the results.
 
 **Command:**
 ```bash
@@ -74,7 +74,7 @@ python3 src/benchmark.py
 ![Scalability Graph](scalability_graph.png)
 
 ### Trend Analysis
-The performance graph demonstrates a clear **non-linear growth** in running time as the input size ($N$) increases. 
+The performance graph demonstrates a clear **non-linear growth** in running time as the input size ($N$) increases for both the matcher and the verifier.
 
 * **Small Inputs ($N < 128$):** The execution time remains negligible and appears to grow linearly.
 * **Large Inputs ($N > 256$):** A distinct upward curve becomes visible. Notably, when the input size doubles from $N=256$ to $N=512$, the runtime increases by a factor significantly larger than 2 (approximately 5x in our tests).
@@ -84,6 +84,7 @@ The observed trend is consistent with the theoretical time complexity of the Gal
 
 1.  **Theoretical Complexity:** The algorithm has a worst-case time complexity of $O(N^2)$ and an average-case complexity of $O(N \log N)$.
 2.  **Experimental Validation:** The "hockey stick" shape of our graph confirms that as $N$ scales, the cost of processing preference lists and managing proposals accelerates. This supports the conclusion that the implementation behaves quadratically ($O(N^2)$) in practice for the given random datasets.
+3.  **Verifier Behavior:** The verifier also exhibits quadratic scaling, since it must check all potential blocking pairs.
 
 ## Assumptions
 
@@ -105,6 +106,6 @@ The observed trend is consistent with the theoretical time complexity of the Gal
 * **Optional:** The `benchmark.py` script (Task C) requires `matplotlib` to generate the graph. If this library is missing, the benchmark script may fail or must be run in an environment where it is installed.
 
 ### 4. Validity
-* We assume $N > 0$.
-* We assume the input files are well-formed (no missing lines, non-integer characters, or incomplete preference lists).
+* We validate that $N \ge 1$.
+* We validate that each preference list is a permutation of $1 \dots N$ and that the input contains at least $2N^2 + 1$ integers (extra trailing tokens are ignored).
 

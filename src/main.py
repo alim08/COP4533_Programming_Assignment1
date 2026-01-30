@@ -15,25 +15,38 @@ class StableMatcher:
         try:
             input_data = sys.stdin.read().split()
             
+            if not input_data:
+                raise ValueError("Empty input file")
+            
             iterator = iter(input_data)
             self.n = int(next(iterator))
-
+            
+            if self.n < 1:
+                raise ValueError(f"Invalid n: {self.n}. Must be at least 1.")
 
             #read in hospital preferences
-            for _ in range(self.n):
+            for i in range(self.n):
                 prefs = [int(next(iterator)) for _ in range(self.n)]
                 self.hospital_prefs.append(prefs)
+                
+                #validate that preferences are a permutation of 1..n
+                if sorted(prefs) != list(range(1, self.n + 1)):
+                    raise ValueError(f"Hospital {i+1} preferences are not a valid permutation of 1..{self.n}")
 
             #read in student preferences and build rank table
-            for _ in range(self.n):
+            for i in range(self.n):
                 prefs = [int(next(iterator)) for _ in range(self.n)]
                 self.student_prefs.append(prefs)
+                
+                #validate that preferences are a permutation of 1..n
+                if sorted(prefs) != list(range(1, self.n + 1)):
+                    raise ValueError(f"Student {i+1} preferences are not a valid permutation of 1..{self.n}")
 
                 rank_map = {hospital: r for r, hospital in enumerate(prefs)}
                 self.ranks.append(rank_map)
         
         except StopIteration:
-            pass
+            raise ValueError("Insufficient input data: expected n + 2*n^2 integers")
     
     
     #verify that all matches are stable
@@ -128,20 +141,36 @@ if __name__ == "__main__":
     solver = StableMatcher()
 
     def parse_prefs_from_tokens(token_iterator, target_solver):
-        target_solver.n = int(next(token_iterator))
-        target_solver.hospital_prefs = []
-        target_solver.student_prefs = []
-        target_solver.ranks = []
+        try:
+            target_solver.n = int(next(token_iterator))
+            
+            if target_solver.n < 1:
+                raise ValueError(f"Invalid n: {target_solver.n}. Must be at least 1.")
+                
+            target_solver.hospital_prefs = []
+            target_solver.student_prefs = []
+            target_solver.ranks = []
 
-        for _ in range(target_solver.n):
-            row = [int(next(token_iterator)) for _ in range(target_solver.n)]
-            target_solver.hospital_prefs.append(row)
+            for i in range(target_solver.n):
+                row = [int(next(token_iterator)) for _ in range(target_solver.n)]
+                target_solver.hospital_prefs.append(row)
+                
+                #validate permutation
+                if sorted(row) != list(range(1, target_solver.n + 1)):
+                    raise ValueError(f"Hospital {i+1} preferences are not a valid permutation")
 
-        for _ in range(target_solver.n):
-            row = [int(next(token_iterator)) for _ in range(target_solver.n)]
-            target_solver.student_prefs.append(row)
-            rank_map = {h: r for r, h in enumerate(row)}
-            target_solver.ranks.append(rank_map)
+            for i in range(target_solver.n):
+                row = [int(next(token_iterator)) for _ in range(target_solver.n)]
+                target_solver.student_prefs.append(row)
+                
+                #validate permutation
+                if sorted(row) != list(range(1, target_solver.n + 1)):
+                    raise ValueError(f"Student {i+1} preferences are not a valid permutation")
+                    
+                rank_map = {h: r for r, h in enumerate(row)}
+                target_solver.ranks.append(rank_map)
+        except StopIteration:
+            raise ValueError("Insufficient input data")
 
     try:
         mode = sys.argv[1] if len(sys.argv) > 1 else "match"
